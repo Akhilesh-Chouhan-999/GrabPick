@@ -1,0 +1,363 @@
+1. 
+{
+  "name": "Akhil Sharma",
+  "phone": "9876543101",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+2. 
+{
+  "name": "Sneha Gupta",
+  "phone": "9876543103",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+
+3.
+{
+  "name": "Rohan Verma",
+  "phone": "9876543102",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+4.
+
+{
+  "name": "Priya Singh",
+  "phone": "9876543104",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+
+5.
+{
+  "name": "Amit Patel",
+  "phone": "9876543105",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+
+6.
+{
+  "name": "Neha Yadav",
+  "phone": "9876543106",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+7.
+{
+  "name": "Rahul Mehta",
+  "phone": "9876543107",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+8.
+{
+  "name": "Karan Malhotra",
+  "phone": "9876543108",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+9.
+{
+  "name": "Anjali Desai",
+  "phone": "9876543109",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+10.
+{
+  "name": "Vikram Joshi",
+  "phone": "9876543110",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+11.
+{
+  "name": "Pooja Nair",
+  "phone": "9876543111",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+12.
+{
+  "name": "Siddharth Rao",
+  "phone": "9876543112",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+13.
+{
+  "name": "Meera Iyer",
+  "phone": "9876543113",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+14.
+{
+  "name": "Arjun Kapoor",
+  "phone": "9876543114",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+15.
+{
+  "name": "Divya Sharma",
+  "phone": "9876543115",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+16.
+{
+  "name": "Manish Tiwari",
+  "phone": "9876543116",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+17.
+{
+  "name": "Ritika Choudhary",
+  "phone": "9876543117",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+18.
+{
+  "name": "Aditya Khanna",
+  "phone": "9876543118",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+19.
+{
+  "name": "Shreya Bansal",
+  "phone": "9876543119",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+20.
+{
+  "name": "Nikhil Arora",
+  "phone": "9876543120",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+21.
+{
+  "name": "Tanya Roy",
+  "phone": "9876543121",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+22.
+{
+  "name": "Harsh Agrawal",
+  "phone": "9876543122",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+23.
+{
+  "name": "Ishita Jain",
+  "phone": "9876543123",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+24.
+{
+  "name": "Yash Thakur",
+  "phone": "9876543124",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+25.
+{
+  "name": "Komal Verma",
+  "phone": "9876543125",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+26.
+{
+  "name": "Saurabh Kulkarni",
+  "phone": "9876543126",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+27.
+{
+  "name": "Lavanya Reddy",
+  "phone": "9876543127",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+28.
+{
+  "name": "Deepak Chandra",
+  "phone": "9876543128",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+29.
+{
+  "name": "Nandini Bhatt",
+  "phone": "9876543129",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+30.
+{
+  "name": "Mohit Saxena",
+  "phone": "9876543130",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+31.
+{
+  "name": "Shruti Kulshrestha",
+  "phone": "9876543131",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+32.
+{
+  "name": "Abhishek Soni",
+  "phone": "9876543132",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+33.
+{
+  "name": "Kavita Mishra",
+  "phone": "9876543133",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+34.
+{
+  "name": "Gaurav Bhatia",
+  "phone": "9876543134",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+35.
+{
+  "name": "Riddhi Parekh",
+  "phone": "9876543135",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+36.
+{
+  "name": "Tarun Sharma",
+  "phone": "9876543136",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+37.
+{
+  "name": "Bhavya Arora",
+  "phone": "9876543137",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+38.
+{
+  "name": "Nitin Rawat",
+  "phone": "9876543138",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+39.
+{
+  "name": "Simran Kaur",
+  "phone": "9876543139",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+40.
+{
+  "name": "Prateek Dubey",
+  "phone": "9876543140",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+41.
+{
+  "name": "Ishan Kapoor",
+  "phone": "9876543141",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+42.
+{
+  "name": "Muskan Tiwari",
+  "phone": "9876543142",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
+
+43.
+{
+  "name": "Ankit Jaiswal",
+  "phone": "9876543143",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+44.
+{
+  "name": "Sakshi Rathore",
+  "phone": "9876543144",
+  "password": "Password@123",
+  "role": "USER"
+}
+
+45.
+{
+  "name": "Raghav Sengar",
+  "phone": "9876543145",
+  "password": "Password@123",
+  "role": "ORGANIZER"
+}
