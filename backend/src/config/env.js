@@ -11,3 +11,6 @@ export const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 export const ACCESS_TOKEN_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES;
 export const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 export const REFRESH_TOKEN_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES;
+export const BASE_URL = process.env.BASE_URL ;
+export const EMAIL = process.env.EMAIL;
+export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD ;

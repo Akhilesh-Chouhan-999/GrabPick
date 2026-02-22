@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose' ; 
 import bcrypt from 'bcrypt' ;
+import crypto from 'crypto' ;
 
 const userSchema  = new Schema({
 
@@ -60,10 +61,10 @@ const userSchema  = new Schema({
         default : null
     },
 
-    role : {
-        type : String , 
-        enum : [ 'ORGANIZER' , 'USER'] ,
-        default : 'USER' ,
+    role          : {
+        type      : String , 
+        enum      : [ 'ORGANIZER' , 'USER'] ,
+        default   : 'USER' ,
         upperCase : true
     } ,
 
@@ -82,15 +83,46 @@ const userSchema  = new Schema({
        select  : false 
     } , 
 
-    otpExpires : {
-          type : Date ,
-        select : false 
+    otpExpires   : {
+          type   : Date ,
+          select : false 
+    } ,
+
+    tokenVersion : {
+        type     : Number ,
+        default  : 0
+    } ,
+
+
+    logoutAt    : {
+        type    : String , 
+        default : null 
+    } , 
+
+
+    lastPasswordChangeAt : {
+        type             : Date , 
+        default          : null 
+    } ,
+
+    passwordResetToken  : {
+                  type  : String ,
+                  select: false
+    } ,
+
+    passwordResetExpires   : {
+                  type     : Date ,
+                  select   : false
     }
 
 
-}, {
+}, 
+
+{
     timestamps : true
 }) ;
+
+
 userSchema.pre('save', async function () {
 
     if (!this.isModified('password')) {
@@ -101,6 +133,19 @@ userSchema.pre('save', async function () {
     this.password = await bcrypt.hash(this.password, salt);
 
 });
+
+
+userSchema.methods.createPasswordResetToken = function () {
+
+    const resetToken = crypto.randomBytes(32).toString('hex') ; 
+
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex') ;
+
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000 ; 
+
+    return resetToken ; 
+
+}
 
 const User = mongoose.model('User' , userSchema) ; 
 export default User ;
