@@ -13,11 +13,30 @@ export const sendResetEmail = async (user , token) => {
         }
     }) ;
 
-    console.log(user.email) ; 
-
     await transporter.sendMail({
         to : user.email  ,
         subject : "Password Reset" ,
         text : `Reset your password using this link: ${resetURL}`
     })
-}
+} ;
+
+export const sendVerificationEmail = async (user, token) => {
+
+  const verifyURL =
+    `${BASE_URL}/verify-email/${token}`;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: EMAIL,
+      pass: EMAIL_PASSWORD
+    }
+  });
+
+  await transporter.sendMail({
+    from: EMAIL,
+    to: user.email,
+    subject: "Verify Your Email",
+    text: `Click here to verify your email: ${verifyURL}`
+  });
+};

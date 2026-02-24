@@ -1,4 +1,4 @@
-import crypto from 'crypto' ; 
+import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import AppError from "../errors/app.error.js";
 import User from "../models/user.model.js";
@@ -6,13 +6,16 @@ import {
     generateAccessToken,
     generateRefreshToken
 } from "../utils/jwt.utils.js";
+import { sendVerificationEmail } from '../utils/email.util.js';
 
 
 
 
 export const registerUser = async (userData) => {
 
-    const { name, phone, password, role , email} = userData;
+    const { name, phone, password, role, email } = userData;
+
+
 
     if (!name || !phone || !password) {
         throw AppError.notFound(' All fields are required ');
@@ -34,8 +37,8 @@ export const registerUser = async (userData) => {
             name,
             phone,
             password,
-            role: role.toUpperCase() ,
-            email 
+            role: (role || 'USER').toUpperCase(),
+            email
         });
 
         const accessToken = generateAccessToken({
@@ -44,6 +47,7 @@ export const registerUser = async (userData) => {
             tokenVersion: user.tokenVersion || 0
         });
 
+
         const refreshToken = generateRefreshToken({
             id: user._id
         });
@@ -51,6 +55,19 @@ export const registerUser = async (userData) => {
 
         user.refreshToken = refreshToken;
         await user.save();
+
+        if (email) {
+
+            const verificationToken = user.createEmailVerificationToken();
+
+            await user.save({ validateBeforeSave: false });
+
+            try {
+                await sendVerificationEmail(user, verificationToken);
+            } catch (err) {
+                console.log('sendVerificationEmail error', err);
+            }
+        }
 
 
         return {
@@ -143,12 +160,14 @@ export const logoutUser = async (userData) => {
         refreshToken
     });
 
-    if (user) {
-        user.refreshToken = null;
-        user.tokenVersion = (user.tokenVersion || 0) + 1;
-        user.logoutAt = new Date().toISOString().split('T')[0];
-        await user.save();
+    if (!user) {
+        throw AppError.notFound('User not found');
     }
+
+    user.refreshToken = null;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    user.logoutAt = new Date().toISOString().split('T')[0];
+    await user.save();
 
     return {
         user: {
@@ -191,84 +210,84 @@ export const getCurrentUserInformation = async (userData) => {
 
 export const changeUserPassword = async (userdata) => {
 
-    const { id , password } = userdata ; 
+    const { id, password } = userdata;
 
-    if(!id ){
-        throw new AppError.notFound('User id not found ' ) ; 
+    if (!id) {
+        throw new AppError.notFound('User id not found ');
     }
 
-    const user = await User.findById(id) ; 
+    const user = await User.findById(id);
 
-    if(!user){
-        throw new AppError.notFound('User not found') ; 
+    if (!user) {
+        throw new AppError.notFound('User not found');
     }
 
-    if(!password){
-        throw new AppError.notFound('Password needed to change') ; 
+    if (!password) {
+        throw new AppError.notFound('Password needed to change');
     }
 
-    user.password = password ;
-    await user.save() ;
+    user.password = password;
+    await user.save();
 
     return {
-        user : {
-            id : user._id ,
-            password : user.password
+        user: {
+            id: user._id,
+            password: user.password
         }
     }
 
-} ; 
+};
 
 export const forgotPasswordService = async (phone) => {
 
     const user = await User.findOne({
-                                 phone
-                               }) ;
+        phone
+    });
 
-    
-    if(!user){
-        throw new AppError.notFound('User not found') ; 
+
+    if (!user) {
+        throw new AppError.notFound('User not found');
     }
 
-    const resetToken = user.createPasswordResetToken() ;
+    const resetToken = user.createPasswordResetToken();
 
     await user.save({
-                        validateBeforeSave : false
-                    }) ;
+        validateBeforeSave: false
+    });
 
 
     return {
-        resetToken ,
-        user 
+        resetToken,
+        user
     }
 
-} ;
+};
 
-export const resetPasswordService = async (token , newPassword ) => {
+export const resetPasswordService = async (token, newPassword) => {
 
     const hashedToken = crypto
-                            .createHash('sha256')
-                            .update(token)
-                            .digest('hex') ;
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
 
-   
+
     const user = await User.findOne({
-        passwordResetToken : hashedToken  ,
-        passwordResetExpires : { $gt : Date.now()} 
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: Date.now() }
     }).select("+passwordResetToken +passwordResetExpires")
 
-    if(!user){
-        throw new AppError('Tokein is invalid or expired') ; 
+    if (!user) {
+        throw new AppError('Tokein is invalid or expired');
     }
 
-    user.password = newPassword ; 
-    user.passwordResetToken = undefined ;
-    user.passwordResetExpires = undefined ;
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
 
-    user.tokenVersion += 1 ; 
-    user.lastPasswordChangeAt = new Date() ; 
+    user.tokenVersion += 1;
+    user.lastPasswordChangeAt = new Date();
 
-    await user.save() ; 
+    await user.save();
 
-    
-} ;
+
+};

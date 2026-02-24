@@ -1,4 +1,4 @@
-import { sendResetEmail } from "../utils/email.util.js";
+import { sendResetEmail, sendVerificationEmail } from "../utils/email.util.js";
 import {
      changeUserPassword,
      forgotPasswordService,
@@ -7,14 +7,15 @@ import {
      registerUser, 
      resetPasswordService 
     } from "../services/auth.service.js" ;
-import e from "express";
 
 
 export const register = async (req, res, next) => {
     try {
+        
 
         const result = await registerUser(req.body);
 
+        
          res
             .status(201)
             .json(result);

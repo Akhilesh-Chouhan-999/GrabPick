@@ -73,10 +73,20 @@ const userSchema  = new Schema({
         default  : null 
     } ,
 
-    isVerified  : {
+    isEmailVerified  : {
         type    : Boolean ,
         default : false 
     } ,
+
+    emailVerificationToken : {
+                    type   : String  
+    },
+
+
+
+    emailVerificationExpires : {
+                        type : String
+    },
 
      otp       : {
        type    : String , 
@@ -146,6 +156,17 @@ userSchema.methods.createPasswordResetToken = function () {
     return resetToken ; 
 
 }
+
+userSchema.methods.createEmailVerificationToken = function () {
+
+   const verificationToken = crypto.randomBytes(32).toString("hex");
+
+   this.emailVerificationToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+
+  this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; 
+
+  return verificationToken;
+};
 
 const User = mongoose.model('User' , userSchema) ; 
 export default User ;

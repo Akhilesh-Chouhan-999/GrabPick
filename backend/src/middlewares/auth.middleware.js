@@ -11,11 +11,9 @@ const protect = async (req, res, next) => {
         token = req.headers.authorization.split(" ")[1];
     }
 
-
     if (!token) {
-        return next(new AppError.unauthorized("Authentication required "));
+        return next(AppError.unauthorized("Authentication required"));
     }
-
 
     try {
 
@@ -25,26 +23,27 @@ const protect = async (req, res, next) => {
             ACCESS_TOKEN_SECRET
         );
 
-       
+
         const user = await User
-                                .findById(decoded.id)
-                                .select('+tokenVersion');
-                                
+            .findById(decoded.id)
+            .select('+tokenVersion');
+
 
         if (!user)
-         return next(new AppError.unauthorized('Invalid token'));
+            return next(AppError.unauthorized('Invalid token'));
 
-        if ((decoded.tokenVersion || 0) !== (user.tokenVersion || 0)) {
-            return next(new AppError.unauthorized('Token revoked'));
+        if (Number(decoded.tokenVersion || 0) !== Number(user.tokenVersion || 0)) {
+            return next(AppError.unauthorized('Token revoked'));
         }
 
-        req.user = decoded;
+        req.user = user;
+
         next();
 
     }
     catch (error) {
 
-        return next(new AppError.unauthorized('Invalid or expired access token'));
+        return next(AppError.unauthorized('Invalid or expired access token'));
 
     }
 };

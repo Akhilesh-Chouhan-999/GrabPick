@@ -5,6 +5,8 @@ import morgan from 'morgan' ;
 import compression from 'compression' ;
 import { configDotenv } from 'dotenv';
 import authRoutes from './routes/auth.routes.js' ;
+import userRoutes from './routes/user.routes.js' ;
+import errorHandler from './middlewares/error.handler.js' ;
 const app = express() ; 
 
 
@@ -24,6 +26,9 @@ app.get('/ping', (req, res) => {
     .json('pong')
 });
 app.use('/api/v1/auth' , authRoutes ) ;
+app.use('/api/v1/user' , userRoutes) ;
+app.use("/uplaods" , express.static('uploads')) ;
+app.use(errorHandler);
 
 
 export default app ; 
