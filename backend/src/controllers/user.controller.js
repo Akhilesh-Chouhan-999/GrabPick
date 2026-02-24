@@ -67,8 +67,7 @@ export const updateAvatarController = async (req , res , next) => {
     next(error) ; 
  }
 
-}
-
+};
 
 export const deleteAccountController = async (req , res , next) => {
 
@@ -90,4 +89,6 @@ export const deleteAccountController = async (req , res , next) => {
 
     }
     
-}
+} ;
+
+

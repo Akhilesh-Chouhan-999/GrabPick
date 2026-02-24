@@ -1,7 +1,9 @@
 import express from 'express' ; 
 import { refreshTokenHandler } from '../utils/refreshToken.utils.js';
 import protect from '../middlewares/auth.middleware.js';
-import { resendVerificationEmail, verifyEmail } from '../services/email.service.js';
+import { resendVerificationEmail, 
+        verifyEmail 
+        } from '../services/email.service.js';
 import { 
     login, 
     register, 
@@ -11,8 +13,9 @@ import {
     forgotPassword, 
     resetPassword
 }   from '../controllers/auth.controller.js';
-const router = express.Router() ; 
 
+
+const router = express.Router() ; 
 
 
 router.post(

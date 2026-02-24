@@ -6,6 +6,7 @@ import compression from 'compression' ;
 import { configDotenv } from 'dotenv';
 import authRoutes from './routes/auth.routes.js' ;
 import userRoutes from './routes/user.routes.js' ;
+import eventRoutes from './routes/event.routes.js' ; 
 import errorHandler from './middlewares/error.handler.js' ;
 const app = express() ; 
 
@@ -27,7 +28,8 @@ app.get('/ping', (req, res) => {
 });
 app.use('/api/v1/auth' , authRoutes ) ;
 app.use('/api/v1/user' , userRoutes) ;
-app.use("/uplaods" , express.static('uploads')) ;
+app.use('/api/v1/event' , eventRoutes)
+app.use("/uploads" , express.static('uploads')) ;
 app.use(errorHandler);
 
 

@@ -6,7 +6,7 @@ import {
      updateProfileController } 
      from '../controllers/user.controller.js';
 import protect from '../middlewares/auth.middleware.js';
-import { uploadProfileImage } from '../middlewares/upload.middleware.js';
+import  uploadProfileImage  from '../middlewares/upload.middleware.js';
 
 const router = express.Router() ; 
 
@@ -35,3 +35,5 @@ router.delete(
 );
 
 export default router ; 
+
+
