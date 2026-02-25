@@ -35,10 +35,11 @@ const imageSchema = new mongoose.Schema(
       required   : true
     },
 
-    faces: [faceSchema] 
+    faces    : [faceSchema] 
   },
   
   { timestamps: true }
 );
 
-export default mongoose.model('Image', imageSchema);
+const Image =  mongoose.model('Image', imageSchema);
+export default Image ; 

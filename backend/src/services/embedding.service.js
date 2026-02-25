@@ -5,7 +5,6 @@ import path from 'path';
 
 const { Canvas, Image, ImageData } = canvas;
 
-// Patch for Node.js
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
 let modelsLoaded = false;

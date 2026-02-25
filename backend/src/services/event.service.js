@@ -25,9 +25,9 @@ export const createEventService = async (organizerId, userData) => {
     });
 
     const event = await Event.create({
-                    ...filteredData,
-                    organizerId
-                 });
+                                        ...filteredData,
+                                        organizerId
+                                    });
 
     return {
         event
