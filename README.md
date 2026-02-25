@@ -1,4 +1,4 @@
-# 🚀 Grappic – AI Powered Smart Graphic Intelligence Platform
+# 🚀 Grabpic – AI Powered Smart Graphic Intelligence Platform
 
 > A production-ready AI-powered web platform that transforms user prompts into intelligent, structured, and optimized graphic outputs using modern full-stack architecture and scalable system design.
 
@@ -6,7 +6,7 @@
 
 ## 📌 Project Overview
 
-Grappic is a web-based intelligent graphic generation and management platform built using modern full-stack technologies.
+Grappic is a web-based intelligent grabpic generation and management platform built using modern full-stack technologies.
 
 It allows users to:
 
@@ -21,19 +21,28 @@ It allows users to:
 
 ## 🏗 System Architecture
 
-Grappic follows a layered architecture pattern:
+Grabpic follows a layered architecture pattern:
 
 
-Client (Frontend - React)
-↓
-API Layer (Express.js)
-↓
-Service Layer (Business Logic)
-↓
-Database Layer (MongoDB)
-↓
-AI Service Integration Layer
-
+┌───────────────────────────────┐
+│  Client (Frontend - React)    │
+└───────────────┬───────────────┘
+                ↓
+┌───────────────────────────────┐
+│  API Layer (Express.js)       │
+└───────────────┬───────────────┘
+                ↓
+┌───────────────────────────────┐
+│  Service Layer (Business)     │
+└───────────────┬───────────────┘
+                ↓
+┌───────────────────────────────┐
+│  Database Layer (MongoDB)     │
+└───────────────┬───────────────┘
+                ↓
+┌───────────────────────────────┐
+│  AI Integration Layer         │
+└───────────────────────────────┘
 
 
 ---
