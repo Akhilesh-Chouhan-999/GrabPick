@@ -1,161 +1,144 @@
-🚀 Grappic – AI Powered Smart Graphic Intelligence Platform
+# 🚀 Grappic – AI Powered Smart Graphic Intelligence Platform
 
-A production-ready AI-powered web platform that transforms user prompts into intelligent, structured, and optimized graphic outputs using modern full-stack architecture and scalable system design.
+> A production-ready AI-powered web platform that transforms user prompts into intelligent, structured, and optimized graphic outputs using modern full-stack architecture and scalable system design.
 
-📌 Project Overview
+---
+
+## 📌 Project Overview
 
 Grappic is a web-based intelligent graphic generation and management platform built using modern full-stack technologies.
 
 It allows users to:
 
-🎨 Generate smart graphic content using AI
+- 🎨 Generate smart graphic content using AI
+- 📁 Manage generated assets
+- 👤 Store user profiles securely
+- 🖼 Upload and manage profile images
+- 🔐 Authenticate securely using JWT
+- ⚙ Scale using production-level backend architecture
 
-📁 Manage generated assets
+---
 
-👤 Store user profiles securely
-
-🖼 Upload and manage profile images
-
-🔐 Authenticate securely using JWT
-
-⚙ Scale using production-level backend architecture
-
-🏗 System Architecture
+## 🏗 System Architecture
 
 Grappic follows a layered architecture pattern:
 
+
 Client (Frontend - React)
-        ↓
+↓
 API Layer (Express.js)
-        ↓
+↓
 Service Layer (Business Logic)
-        ↓
+↓
 Database Layer (MongoDB)
-        ↓
+↓
 AI Service Integration Layer
-🧱 Architecture Principles Used
 
-Separation of Concerns
 
-Modular Service Pattern
 
-Centralized Error Handling
+---
 
-Secure Authentication
+## 🧱 Architecture Principles Used
 
-Scalable File Storage Design
+- Separation of Concerns
+- Modular Service Pattern
+- Centralized Error Handling
+- Secure Authentication
+- Scalable File Storage Design
+- Environment-based Configuration
 
-Environment-based Configuration
+---
 
-🛠 Tech Stack
-🔹 Frontend
+## 🛠 Tech Stack
 
-React.js
+### 🔹 Frontend
 
-Axios
+- React.js
+- Axios
+- Context API / State Management
+- Responsive UI Design
 
-Context API / State Management
+### 🔹 Backend
 
-Responsive UI Design
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- Bcrypt (Password hashing)
+- Multer (File uploads)
+- Nodemailer (Email services)
 
-🔹 Backend
+### 🔹 Security
 
-Node.js
+- JWT stored in HttpOnly Cookies
+- Password hashing with bcrypt
+- Reset password token encryption
+- Input filtering for update routes
+- Protected routes middleware
 
-Express.js
+---
 
-MongoDB
-
-Mongoose
-
-JWT Authentication
-
-Bcrypt (Password hashing)
-
-Multer (File uploads)
-
-Nodemailer (Email services)
-
-🔹 Security
-
-JWT stored in HttpOnly Cookies
-
-Password hashing with bcrypt
-
-Reset password token encryption
-
-Input filtering for update routes
-
-Protected routes middleware
-
-🔐 Authentication & Security Features
+## 🔐 Authentication & Security Features
 
 Grappic implements secure authentication using:
 
-✅ Signup & Login
+- ✅ Signup & Login
+- ✅ JWT-based authentication
+- ✅ Protected routes middleware
+- ✅ Forgot password flow
+- ✅ Secure reset token generation
+- ✅ Email-based password reset
+- ✅ Secure cookie handling
 
-✅ JWT-based authentication
+---
 
-✅ Protected routes middleware
+## 🔁 Password Reset Flow
 
-✅ Forgot password flow
+1. User enters email
+2. Server generates encrypted reset token
+3. Token stored in DB with expiry
+4. Email sent with reset URL
+5. User resets password securely
 
-✅ Secure reset token generation
+---
 
-✅ Email-based password reset
+## 🖼 Profile & Avatar Management
 
-✅ Secure cookie handling
-
-🔁 Password Reset Flow
-
-User enters email
-
-Server generates encrypted reset token
-
-Token stored in DB with expiry
-
-Email sent with reset URL
-
-User resets password securely
-
-🖼 Profile & Avatar Management
-
-Update profile (name, email, phone)
-
-Avatar upload using Multer
-
-Old avatar auto deletion on update
-
-Secure ownership validation
-
-Account deletion with cleanup
+- Update profile (name, email, phone)
+- Avatar upload using Multer
+- Old avatar auto deletion on update
+- Secure ownership validation
+- Account deletion with cleanup
 
 This demonstrates real-world backend file handling logic.
 
-🧠 AI Integration Design
+---
+
+## 🧠 AI Integration Design
 
 Grappic is built to integrate AI services for:
 
-Prompt-based graphic generation
+- Prompt-based graphic generation
+- Intelligent formatting
+- AI-driven visual enhancements
+- Future generative AI API support
 
-Intelligent formatting
+---
 
-AI-driven visual enhancements
+## 🔮 Future AI Scalability
 
-Future generative AI API support
+- External AI API integration
+- Background job processing
+- Queue-based scaling (Bull / Redis)
+- AI model switching capability
 
-🔮 Future AI Scalability
+---
 
-External AI API integration
+## 📂 Project Structure
 
-Background job processing
-
-Queue-based scaling (Bull / Redis)
-
-AI model switching capability
-
-📂 Project Structure
-grappic/
+grabPic/
+/Backend
 │
 ├── controllers/
 ├── services/
@@ -167,107 +150,91 @@ grappic/
 ├── uploads/
 ├── app.js
 └── server.js
-🏛 Design Pattern Used
 
-Controller → Service → Model Pattern
 
-Custom AppError Class
 
-Centralized Error Handler
+---
 
-Middleware-based security
+## 🏛 Design Pattern Used
 
-🚀 Key Features
+- Controller → Service → Model Pattern
+- Custom AppError Class
+- Centralized Error Handler
+- Middleware-based security
 
-🔐 Secure authentication system
+---
 
-📧 Email-based password reset
+## 🚀 Key Features
 
-🖼 Avatar upload system
+- 🔐 Secure authentication system
+- 📧 Email-based password reset
+- 🖼 Avatar upload system
+- 🧹 Account deletion cleanup
+- 📦 Modular backend architecture
+- 🧠 AI-ready scalable design
+- ⚙ Production-grade error handling
+- 🌍 Environment-based config management
 
-🧹 Account deletion cleanup
+---
 
-📦 Modular backend architecture
+## 🧩 Real-World Concepts Implemented
 
-🧠 AI-ready scalable design
+- RESTful API Design
+- JWT Token Lifecycle
+- Secure Cookie Strategy
+- Role-based Route Protection (extendable)
+- Service Layer Architecture
+- File System Management
+- Error Propagation Pattern
+- Clean Code Structure
 
-⚙ Production-grade error handling
+---
 
-🌍 Environment-based config management
-
-🧩 Real-World Concepts Implemented
-
-RESTful API Design
-
-JWT Token Lifecycle
-
-Secure Cookie Strategy
-
-Role-based Route Protection (extendable)
-
-Service Layer Architecture
-
-File System Management
-
-Error Propagation Pattern
-
-Clean Code Structure
-
-📈 Scalability Considerations
+## 📈 Scalability Considerations
 
 Grappic is designed with scalability in mind:
 
-Stateless JWT authentication
+- Stateless JWT authentication
+- Redis-ready caching support
+- S3/Cloudinary file storage migration ready
+- Docker containerization ready
+- Microservices-ready AI integration
 
-Redis-ready caching support
+---
 
-S3/Cloudinary file storage migration ready
+## 🔮 Future Enhancements
 
-Docker containerization ready
+- AI-generated image preview
+- Prompt history tracking
+- Role-based authorization
+- Rate limiting
+- Payment integration
+- Background job queues
+- Cloud file storage
+- Microservices architecture
 
-Microservices-ready AI integration
+---
 
-🔮 Future Enhancements
-
-AI-generated image preview
-
-Prompt history tracking
-
-Role-based authorization
-
-Rate limiting
-
-Payment integration
-
-Background job queues
-
-Cloud file storage
-
-Microservices architecture
-
-🎯 Why This Project Is Resume-Worthy
+## 🎯 Why This Project Is Resume-Worthy
 
 Grappic demonstrates:
 
-Full-stack development
+- Full-stack development
+- Production-level backend architecture
+- Security best practices
+- AI integration readiness
+- Real-world authentication flows
+- Clean, scalable system design
 
-Production-level backend architecture
+> This is not just a CRUD project —  
+> It is a system-designed platform.
 
-Security best practices
+---
 
-AI integration readiness
+## 👨‍💻 Author
 
-Real-world authentication flows
-
-Clean, scalable system design
-
-This is not just a CRUD project —
-It is a system-designed platform.
-
-👨‍💻 Author
-
-Akhilesh Chouhan
-B.Tech Computer Science
-Full-Stack & AI Enthusiast
+**Akhilesh Chouhan**  
+B.Tech Computer Science  
+Full-Stack & AI Enthusiast  
 
 Focused on building scalable, production-grade applications with intelligent system design.
