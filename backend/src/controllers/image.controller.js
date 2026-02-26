@@ -1,4 +1,6 @@
-import { matchFaceInEventService, 
+import { deleteImageService, 
+        getEventImagesService, 
+        matchFaceInEventService, 
         uploadEventImageService 
         } from "../services/image.service.js";
 
@@ -26,28 +28,31 @@ export const uploadEventImageController = async (req , res , next ) => {
         next(error) ; 
 
     }
-}
+}; 
 
+export const getEventImagesController = async (req, res, next) => {
+  try {
+    const { eventId } = req.params;
+    const { page = 1 , limit = 10 } = req.query ;
 
-export const getEventImagesController = async (req , res , next ) => {
+    const images = await getEventImagesService(eventId , Number(page) , Number(limit)) ;
 
-    try {
-        
-    } 
-    catch (error) {
-        
-    }
-} ;
+    res.status(200).json({
+      success: true,
+      images
+    });
 
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const matchFaceInEventController = async (req , res , next ) => {
 
 
     try {
         
-
         const { eventId } = req.params;
-
 
         const result = await matchFaceInEventService(eventId, req.file.path);
 
@@ -62,4 +67,21 @@ export const matchFaceInEventController = async (req , res , next ) => {
         next(error) ; 
     }
 
-}
+} ;
+
+export const deleteImageController = async (req, res, next) => {
+  try {
+    const { imageId } = req.params;
+    const organizerId = req.user.id;
+
+    const result = await deleteImageService(imageId, organizerId);
+
+    res.status(200).json({
+      success: true,
+      ...result
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};

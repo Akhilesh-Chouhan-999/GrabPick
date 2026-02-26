@@ -14,3 +14,13 @@ export const cosineSimilarity = (vecA, vecB) => {
 
   return dot / (normA * normB);
 };
+
+
+export const normalizeVector = (vector) => {
+  
+  const magnitude = Math.sqrt(
+    vector.reduce((sum, val) => sum + val * val, 0)
+  );
+
+  return vector.map(val => val / magnitude);
+};

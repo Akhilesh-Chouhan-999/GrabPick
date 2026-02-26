@@ -1,5 +1,7 @@
 import AppError from "../errors/app.error.js" ; 
 import Event from "../models/event.model.js";
+import fs from 'fs' ; 
+import path from 'path' ; 
 
 export const createEventService = async (organizerId, userData) => {
 
@@ -35,7 +37,7 @@ export const createEventService = async (organizerId, userData) => {
 
 };
 
-export const getEventService =   async (eventId) => {
+export const getSingleEventService  =   async (eventId) => {
     
     if(!eventId)
     throw new AppError("Id not found" , 400) ;
@@ -50,3 +52,61 @@ export const getEventService =   async (eventId) => {
     } 
 
 } ;
+
+export const getAllEventsService = async (organizerId) => {
+
+  if (!organizerId)
+    throw new AppError("Organizer not found", 404);
+
+  const events = await Event.find({ organizerId })
+                            .sort({ createdAt: -1 });
+
+  return events;
+
+};
+
+export const updateEventService = async (eventId, organizerId, updateData) => {
+
+  const event = await Event.findById(eventId);
+
+  if (!event)
+    throw new AppError("Event not found", 404);
+
+  if (event.organizerId.toString() !== organizerId)
+    throw new AppError("Not authorized", 403);
+
+  Object.assign(event, updateData);
+
+  await event.save();
+
+  return event;
+};
+
+
+export const deleteEventService = async (eventId, organizerId) => {
+
+  const event = await Event.findById(eventId);
+
+  if (!event)
+    throw new AppError('Event not found', 404);
+
+  if (event.organizerId.toString() !== organizerId)
+    throw new AppError('Not authorized', 403);
+
+  const images = await Image.find({ eventId });
+
+  for (const img of images) {
+
+    const absolutePath = path.resolve(img.imageUrl);
+
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
+    }
+
+    await Image.findByIdAndDelete(img._id);
+  }
+
+  await Event.findByIdAndDelete(eventId);
+
+  return { message: 'Event and related images deleted successfully' };
+};

@@ -1,10 +1,14 @@
 import { loadImage } from "canvas";
-import { cosineSimilarity } from '../utils/vector.utils.js';
+import { cosineSimilarity, 
+          normalizeVector 
+        } from '../utils/vector.utils.js';
 import AppError from "../errors/app.error.js";
 import Event from "../models/event.model.js";
 import { loadModels } from "./embedding.service.js";
 import * as faceapi from 'face-api.js' ; 
 import Image from "../models/image.model.js";
+import fs from 'fs' ; 
+import path from 'path' ; 
 
 
 export const uploadEventImageService = async (eventId , userId , imagePath ) => {
@@ -34,7 +38,7 @@ export const uploadEventImageService = async (eventId , userId , imagePath ) => 
 
 
       const faces = detections.map(det => ({
-                    embedding: Array.from(det.descriptor),
+                    embedding: normalizeVector(Array.from(det.descriptor)),
                     box: {
                     x: det.detection.box.x,
                     y: det.detection.box.y,
@@ -57,6 +61,25 @@ export const uploadEventImageService = async (eventId , userId , imagePath ) => 
 
 } ;
 
+export const getEventImagesService = async (eventId, page = 1, limit = 10) => {
+
+  const skip = (page - 1) * limit;
+
+  const images = await Image.find({ eventId })
+    .select('-faces.embedding')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Image.countDocuments({ eventId });
+
+  return {
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    images
+  };
+};
 
 export const matchFaceInEventService = async (eventId, imagePath) => {
 
@@ -72,7 +95,7 @@ export const matchFaceInEventService = async (eventId, imagePath) => {
   const img = await loadImage(imagePath);
 
   const detection = await faceapi
-    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({inputSize : 608 , scoreThreshold : 0.5}))
     .withFaceLandmarks()
     .withFaceDescriptor();
 
@@ -106,5 +129,40 @@ export const matchFaceInEventService = async (eventId, imagePath) => {
     }
   }
 
-  return matchedImages;
+  matchedImages.sort((a, b) => b.similarity - a.similarity);
+
+  const limitedResults = matchedImages.slice(0, 20);
+
+  return {
+  totalMatches: matchedImages.length,
+  results: limitedResults
+};
+
+};
+
+export const deleteImageService = async (imageId, organizerId) => {
+
+  const image = await Image.findById(imageId);
+
+  if (!image)
+    throw new AppError('Image not found', 404);
+
+  const event = await Event.findById(image.eventId);
+
+  if (!event)
+    throw new AppError('Event not found', 404);
+
+  if (event.organizerId.toString() !== organizerId)
+    throw new AppError('Not authorized', 403);
+
+  // delete file from disk
+  const absolutePath = path.resolve(image.imageUrl);
+
+  if (fs.existsSync(absolutePath)) {
+    fs.unlinkSync(absolutePath);
+  }
+
+  await Image.findByIdAndDelete(imageId);
+
+  return { message: 'Image deleted successfully' };
 };

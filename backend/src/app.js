@@ -32,6 +32,7 @@ app.use('/api/v1/user' , userRoutes) ;
 app.use('/api/v1/event' , eventRoutes) ;
 app.use('/api/v1/image' , imageRoutes) ;
 
+
 app.use("/uploads" , express.static('uploads')) ;
 app.use(errorHandler);
 
