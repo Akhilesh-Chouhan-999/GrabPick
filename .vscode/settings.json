@@ -1,3 +1,21 @@
-{
-  "claudeCodeChat.permissions.yoloMode": true
-}
+// {
+// "workbench.colorTheme": "Catppuccin Mocha",
+
+// "editor.formatOnSave": true,
+
+// "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+// "js/ts.updateImportsOnFileMove.enabled": "always",
+
+// "editor.tabSize": 2,
+
+// "files.autoSave": "afterDelay",
+
+// "files.autoSaveDelay": 1000,
+
+// "terminal.integrated.defaultProfile.windows": "Command Prompt",
+
+// "explorer.confirmDelete": false,
+
+// // "editor.fontLigatures": true
+// }
