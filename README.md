@@ -68,15 +68,15 @@ GrabPick uses face recognition to solve this:
 
 ```
 ┌──────────────────┐        ┌──────────────────────────────────┐
-│   React Frontend │───────▶│     Express.js API Gateway       │
+│   React Frontend │──────▶│      Express.js API Gateway       │
 │   (Vite :5173)   │  proxy │         (Port 5000)              │
 └──────────────────┘        └──────────┬───────────────────────┘
                                        │
                     ┌──────────────────┼──────────────────────┐
                     │                  │                      │
              ┌──────▼──────┐   ┌──────▼──────┐   ┌──────────▼──────────┐
-             │ Auth Service│   │Event Service │   │  Image Service      │
-             │  (JWT/Email)│   │  (CRUD)      │   │  (Upload/Match)     │
+             │ Auth Service│   │Event Service│   │  Image Service      │
+             │  (JWT/Email)│   │  (CRUD)     │   │  (Upload/Match)     │
              └──────┬──────┘   └──────┬──────┘   └──────────┬──────────┘
                     │                 │                      │
                     │                 │              ┌───────▼────────┐
@@ -89,9 +89,9 @@ GrabPick uses face recognition to solve this:
                     └────────┬────────┴──────────────────────┘
                              │
                       ┌──────▼──────┐         ┌─────────────┐
-                      │   MongoDB   │         │    Redis     │
-                      │  (Data +    │         │  (BullMQ     │
-                      │  Embeddings)│         │   Queues)    │
+                      │   MongoDB   │         │    Redis    │
+                      │  (Data +    │         │  (BullMQ    │
+                      │  Embeddings)│         │   Queues)   │
                       └─────────────┘         └─────────────┘
 ```
 
@@ -447,7 +447,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Author
 
-**Ramakant Chouhan**
-B.Tech Computer Science | Full-Stack & AI Developer
+**Akhilesh Chouhan**
+B.Tech Computer Science | Full-Stack Developer
 
 Built with Node.js, React, and face-api.js.
