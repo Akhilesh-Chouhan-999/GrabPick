@@ -1,43 +1,45 @@
-import express from 'express' ;
-import cors from 'cors' ; 
-import helmet from 'helmet' ; 
-import morgan from 'morgan' ; 
-import compression from 'compression' ;
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
 import { configDotenv } from 'dotenv';
-import authRoutes from './routes/auth.routes.js' ;
-import userRoutes from './routes/user.routes.js' ;
-import eventRoutes from './routes/event.routes.js' ; 
-import imageRoutes from './routes/image.routes.js' ;
-import errorHandler from './middlewares/error.handler.js' ;
-const app = express() ; 
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import eventRoutes from './routes/event.routes.js';
+import imageRoutes from './routes/image.routes.js';
+import errorHandler from './middlewares/error.handler.js';
+const app = express();
 
 
-app.use(express.json()) ; 
-app.use(express.urlencoded({extended : true})) ;
-app.use(cors()) ;
-app.use(helmet()) ; 
-app.use(morgan('dev')) ; 
-app.use(compression()) ;
-configDotenv() ;
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(morgan('dev'));
+app.use(compression());
+configDotenv();
 
 
 app.get('/ping', (req, res) => {
-    
+
     res
-    .status(200)
-    .json('pong')
+        .status(200)
+        .json('pong')
 });
-app.use('/api/v1/auth' , authRoutes ) ;
-app.use('/api/v1/user' , userRoutes) ;
-app.use('/api/v1/event' , eventRoutes) ;
-app.use('/api/v1/image' , imageRoutes) ;
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/event', eventRoutes);
+app.use('/api/v1/image', imageRoutes);
 
 
-app.use("/uploads" , express.static('uploads')) ;
+app.use("/uploads", express.static('src/uploads'));
 app.use(errorHandler);
 
 
-export default app ; 
+export default app;
 
 
 

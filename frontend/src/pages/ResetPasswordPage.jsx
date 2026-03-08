@@ -14,7 +14,6 @@ import toast from "react-hot-toast";
 import { authService } from "../services/authService";
 
 const ResetPasswordPage = () => {
-  "use no memo";
   const { token } = useParams();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -24,11 +23,9 @@ const ResetPasswordPage = () => {
   const {
     register,
     handleSubmit,
-    watch,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm();
-
-  const password = watch("password");
 
   const onSubmit = async (values) => {
     try {
@@ -127,7 +124,7 @@ const ResetPasswordPage = () => {
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
                   validate: (val) =>
-                    val === password || "Passwords do not match",
+                    val === getValues("password") || "Passwords do not match",
                 })}
                 className="w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 placeholder="••••••••"

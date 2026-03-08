@@ -1,7 +1,7 @@
 import express from 'express';
-import upload from '../middlewares/upload.middleware.js';
+import { uploadEventImage } from '../middlewares/upload.middleware.js';
 import protect from '../middlewares/auth.middleware.js';
-import {authorizeOrganizer} from '../middlewares/role.middleware.js' ; 
+import { authorizeOrganizer } from '../middlewares/role.middleware.js';
 import {
   uploadEventImageController,
   getEventImagesController,
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post(
   '/:eventId/images',
   protect,
-  upload.single('image'),
+  uploadEventImage.single('image'),
   uploadEventImageController
 );
 
@@ -27,14 +27,14 @@ router.get(
 router.post(
   '/:eventId/match',
   protect,
-  upload.single('image'),
+  uploadEventImage.single('image'),
   matchFaceInEventController
 );
 
 router.delete(
   '/:imageId',
   protect,
-  authorizeOrganizer ,
+  authorizeOrganizer,
   deleteImageController
 );
 

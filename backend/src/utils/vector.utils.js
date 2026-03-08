@@ -15,9 +15,18 @@ export const cosineSimilarity = (vecA, vecB) => {
   return dot / (normA * normB);
 };
 
+export const euclideanDistance = (vecA, vecB) => {
+  let sum = 0.0;
+  for (let i = 0; i < vecA.length; i++) {
+    const diff = vecA[i] - vecB[i];
+    sum += diff * diff;
+  }
+  return Math.sqrt(sum);
+};
+
 
 export const normalizeVector = (vector) => {
-  
+
   const magnitude = Math.sqrt(
     vector.reduce((sum, val) => sum + val * val, 0)
   );

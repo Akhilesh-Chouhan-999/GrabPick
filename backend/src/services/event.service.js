@@ -95,6 +95,8 @@ export const deleteEventService = async (eventId, organizerId) => {
 
   const images = await Image.find({ eventId });
 
+
+
   for (const img of images) {
 
     const absolutePath = path.resolve(img.imageUrl);

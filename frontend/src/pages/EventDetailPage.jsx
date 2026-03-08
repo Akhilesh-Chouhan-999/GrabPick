@@ -25,7 +25,6 @@ import { getImageUrl } from "../utils/image";
 import ConfirmModal from "../components/ConfirmModal";
 
 const EventDetailPage = () => {
-  "use no memo";
   const { eventId } = useParams();
   const navigate = useNavigate();
   const { user, isOrganizer } = useAuth();
@@ -81,9 +80,11 @@ const EventDetailPage = () => {
 
   useEffect(() => {
     let active = true;
-    Promise.all([loadEvent(), loadImages()]).finally(() => {
+    const init = async () => {
+      await Promise.all([loadEvent(), loadImages()]);
       if (active) setLoading(false);
-    });
+    };
+    init();
     return () => {
       active = false;
     };

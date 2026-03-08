@@ -1,65 +1,65 @@
 import { loadImage } from "canvas";
-import { cosineSimilarity, 
-          normalizeVector 
-        } from '../utils/vector.utils.js';
+import {
+  euclideanDistance
+} from '../utils/vector.utils.js';
 import AppError from "../errors/app.error.js";
 import Event from "../models/event.model.js";
 import { loadModels } from "./embedding.service.js";
-import * as faceapi from 'face-api.js' ; 
+import * as faceapi from 'face-api.js';
 import Image from "../models/image.model.js";
-import fs from 'fs' ; 
-import path from 'path' ; 
+import fs from 'fs';
+import path from 'path';
 
 
-export const uploadEventImageService = async (eventId , userId , imagePath ) => {
+export const uploadEventImageService = async (eventId, userId, imagePath) => {
 
-    const event = await Event.findById(eventId) ; 
+  const event = await Event.findById(eventId);
 
-    if(!event)
-    throw new AppError.notFound("Event not found") ; 
+  if (!event)
+    throw AppError.notFound("Event not found");
 
-    if(event.organizerId.toString() !== userId)
-        throw new AppError('Only organizer can upload event images ' , 401) ; 
+  if (event.organizerId.toString() !== userId)
+    throw AppError.unauthorized('Only organizer can upload event images');
 
-    await loadModels() ; 
+  await loadModels();
 
-    const img = await loadImage(imagePath) ;
+  const img = await loadImage(imagePath);
 
-    const detections = await faceapi
-                                    .detectAllFaces(
-                                        img,
-                                       new faceapi.TinyFaceDetectorOptions({ inputSize: 608 , scoreThreshold : 0.5 })
-                                    )
-                                    .withFaceLandmarks()
-                                    .withFaceDescriptors();
+  const detections = await faceapi
+    .detectAllFaces(
+      img,
+      new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })
+    )
+    .withFaceLandmarks()
+    .withFaceDescriptors();
 
-    if(!detections.length)
-    throw new AppError('No faces detected in image' , 400) ; 
-
-
-      const faces = detections.map(det => ({
-                    embedding: normalizeVector(Array.from(det.descriptor)),
-                    box: {
-                    x: det.detection.box.x,
-                    y: det.detection.box.y,
-                    width: det.detection.box.width,
-                    height: det.detection.box.height
-            }
-        }));
+  if (!detections.length)
+    throw new AppError('No faces detected in image', 400);
 
 
-        const imageDoc = await Image.create({
-            eventId ,
-            uploadedBy : userId ,
-            imageUrl : imagePath ,
-            faces 
-        }) ; 
+  const faces = detections.map(det => ({
+    embedding: Array.from(det.descriptor),
+    box: {
+      x: det.detection.box.x,
+      y: det.detection.box.y,
+      width: det.detection.box.width,
+      height: det.detection.box.height
+    }
+  }));
 
 
-        return imageDoc ; 
+  const imageDoc = await Image.create({
+    eventId,
+    uploadedBy: userId,
+    imageUrl: imagePath,
+    faces
+  });
 
 
-} ;
+  return imageDoc;
+
+
+};
 
 export const getEventImagesService = async (eventId, page = 1, limit = 10) => {
 
@@ -95,7 +95,7 @@ export const matchFaceInEventService = async (eventId, imagePath) => {
   const img = await loadImage(imagePath);
 
   const detection = await faceapi
-    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({inputSize : 608 , scoreThreshold : 0.5}))
+    .detectSingleFace(img, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
     .withFaceLandmarks()
     .withFaceDescriptor();
 
@@ -107,25 +107,30 @@ export const matchFaceInEventService = async (eventId, imagePath) => {
 
   const images = await Image.find({ eventId });
 
-  const threshold = 0.6; // you can tune this
+  const threshold = 0.6; // euclidean distance: lower = same person
   const matchedImages = [];
 
   for (const image of images) {
 
+    let bestDist = Infinity;
+
     for (const face of image.faces) {
 
-      const similarity = cosineSimilarity(
-                                            queryEmbedding,
-                                            face.embedding
-                                        );
+      const dist = euclideanDistance(
+        queryEmbedding,
+        face.embedding
+      );
 
-      if (similarity > threshold) {
-        matchedImages.push({
-          imageUrl: image.imageUrl,
-          similarity
-        });
-        break;
+      if (dist < bestDist) {
+        bestDist = dist;
       }
+    }
+
+    if (bestDist < threshold) {
+      matchedImages.push({
+        imageUrl: image.imageUrl,
+        similarity: Math.max(0, 1 - bestDist) // convert to 0-1 score
+      });
     }
   }
 
@@ -134,9 +139,9 @@ export const matchFaceInEventService = async (eventId, imagePath) => {
   const limitedResults = matchedImages.slice(0, 20);
 
   return {
-  totalMatches: matchedImages.length,
-  results: limitedResults
-};
+    totalMatches: matchedImages.length,
+    results: limitedResults
+  };
 
 };
 

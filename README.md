@@ -1,387 +1,453 @@
-# 🚀 GrabPic — AI-assisted Image Generation & Management
+# GrabPick
 
-GrabPic is an AI-assisted image generation and management platform focused on user-centric graphics, face embeddings, and secure asset lifecycle management. The repository contains a production-oriented Node/Express backend that exposes RESTful APIs for authentication, profile management, image uploads, face-embedding extraction (using face-api.js and TensorFlow.js), and background job processing (BullMQ + Redis). Model artifacts used for detection/recognition are included under `backend/models`.
+**AI-powered event photo discovery using face recognition.**
 
-## 📌 Project Overview
+Attendees upload a selfie and instantly find every event photo they appear in — no manual scrolling through thousands of images.
 
-GrabPic provides backend services to:
+---
 
-- Produce and store AI-assisted graphics and generated assets (prompt-driven or model-assisted)
-- Extract and store face embeddings for matching/verification workflows
-- Handle secure user authentication and profile/avatar management
-- Process image-related background work via queues (BullMQ)
+## Problem
 
-The backend is designed to be modular and production-ready, with clear extension points for cloud storage (S3/Cloudinary), external AI APIs, and containerized deployment.
+At large events (weddings, concerts, college fests, conferences), organizers capture thousands of photos. Finding your own photos is slow, frustrating, and impractical.
 
-## 🏗 System Architecture
+## Solution
 
-GrabPic follows a layered architecture:
+GrabPick uses face recognition to solve this:
 
-Client (Frontend - React) → API Layer (Express.js) → Service Layer → Database (MongoDB) → AI Integration Layer
+1. **Organizer** creates an event and uploads photos.
+2. Backend detects every face and stores a 128-dimensional embedding per face.
+3. **Attendee** enters the event ID and uploads a selfie.
+4. The system computes Euclidean distance between the selfie embedding and all stored embeddings.
+5. Matching photos (distance < 0.6) are returned instantly, ranked by similarity.
 
-## 🛠 Tech Stack
+---
 
-- Frontend: React.js, Axios
-- Backend: Node.js, Express.js
-- Database: MongoDB (Mongoose)
-- Auth: JWT, bcrypt
-- File uploads: Multer (local uploads, S3-ready integrations)
-- Background jobs: BullMQ (Redis)
-- AI/ML: face-api.js / TensorFlow.js model artifacts included in `backend/models`
+## Features
 
-## 🔧 Install & Run (Local)
+### Organizer
 
-1. Clone the repository and open the workspace root.
+- JWT-based authentication with email verification
+- Create, update, and delete events
+- Bulk image upload with automatic face detection
+- Per-image face count and bounding box metadata
+- Delete individual images
 
-2. Backend setup
+### Attendee
 
-```powershell
+- Join any event via Event ID
+- Upload a selfie to find matching photos
+- AI-ranked results with similarity scores
+- Lightbox image viewer
+
+### Security
+
+- Passwords hashed with bcrypt (salt 10)
+- Access + refresh token rotation
+- Email verification and password reset via secure tokens
+- Helmet security headers
+- Event-scoped data isolation
+- Face embeddings stored instead of raw face data (privacy-first)
+
+---
+
+## Tech Stack
+
+| Layer           | Technology                                                                 |
+| --------------- | -------------------------------------------------------------------------- |
+| Frontend        | React 19, React Router 7, Redux Toolkit, Tailwind CSS, Framer Motion, Vite |
+| Backend         | Node.js, Express 5, Mongoose (MongoDB)                                     |
+| Auth            | JWT (access + refresh tokens), bcrypt                                      |
+| AI/ML           | face-api.js (SSD MobileNet v1 + FaceLandmark68 + FaceRecognitionNet)       |
+| File Upload     | Multer (local disk, S3-ready)                                              |
+| Background Jobs | BullMQ + Redis (IORedis)                                                   |
+| Email           | Nodemailer                                                                 |
+
+---
+
+## System Architecture
+
+```
+┌──────────────────┐        ┌──────────────────────────────────┐
+│   React Frontend │───────▶│     Express.js API Gateway       │
+│   (Vite :5173)   │  proxy │         (Port 5000)              │
+└──────────────────┘        └──────────┬───────────────────────┘
+                                       │
+                    ┌──────────────────┼──────────────────────┐
+                    │                  │                      │
+             ┌──────▼──────┐   ┌──────▼──────┐   ┌──────────▼──────────┐
+             │ Auth Service│   │Event Service │   │  Image Service      │
+             │  (JWT/Email)│   │  (CRUD)      │   │  (Upload/Match)     │
+             └──────┬──────┘   └──────┬──────┘   └──────────┬──────────┘
+                    │                 │                      │
+                    │                 │              ┌───────▼────────┐
+                    │                 │              │  face-api.js   │
+                    │                 │              │  SSD MobileNet │
+                    │                 │              │  + Landmarks   │
+                    │                 │              │  + Recognition │
+                    │                 │              └───────┬────────┘
+                    │                 │                      │
+                    └────────┬────────┴──────────────────────┘
+                             │
+                      ┌──────▼──────┐         ┌─────────────┐
+                      │   MongoDB   │         │    Redis     │
+                      │  (Data +    │         │  (BullMQ     │
+                      │  Embeddings)│         │   Queues)    │
+                      └─────────────┘         └─────────────┘
+```
+
+### Data Flow
+
+**Upload Flow:**
+Organizer → Upload image → Multer saves to disk → SSD MobileNet detects all faces → 68-point landmarks extracted → 128-dim descriptor per face → Stored in MongoDB with image reference
+
+**Match Flow:**
+Attendee → Upload selfie → Detect single face → Generate 128-dim descriptor → Euclidean distance against all event face embeddings → Return images where distance < 0.6
+
+---
+
+## Database Schema
+
+### User
+
+| Field                  | Type    | Notes                                      |
+| ---------------------- | ------- | ------------------------------------------ |
+| name                   | String  | 3-30 chars                                 |
+| email                  | String  | Unique, optional                           |
+| phone                  | String  | Unique, required, 10-15 digits             |
+| password               | String  | Min 8 chars, mixed case + number + special |
+| role                   | Enum    | `ORGANIZER` \| `USER`                      |
+| profileImage           | String  | Avatar URL                                 |
+| isEmailVerified        | Boolean | Default false                              |
+| refreshToken           | String  | Current refresh token                      |
+| emailVerificationToken | String  | Hashed token                               |
+| passwordResetToken     | String  | Hashed token                               |
+
+### Event
+
+| Field       | Type     | Notes        |
+| ----------- | -------- | ------------ |
+| title       | String   | Required     |
+| description | String   | Optional     |
+| organizerId | ObjectId | Ref: User    |
+| eventDate   | Date     | Optional     |
+| location    | String   | Optional     |
+| isActive    | Boolean  | Default true |
+
+### Image
+
+| Field      | Type     | Notes                                                           |
+| ---------- | -------- | --------------------------------------------------------------- |
+| eventId    | ObjectId | Ref: Event                                                      |
+| uploadedBy | ObjectId | Ref: User                                                       |
+| imageUrl   | String   | File path on disk                                               |
+| faces      | Array    | Array of `{ embedding: [128 floats], box: {x,y,width,height} }` |
+
+---
+
+## API Reference
+
+### Auth (`/api/v1/auth`)
+
+| Method | Endpoint                 | Description                     |
+| ------ | ------------------------ | ------------------------------- |
+| POST   | `/register`              | Register new user               |
+| POST   | `/login`                 | Login                           |
+| POST   | `/refresh`               | Refresh access token            |
+| POST   | `/logout`                | Logout                          |
+| GET    | `/me/:id`                | Get current user                |
+| PATCH  | `/change-password`       | Change password (protected)     |
+| POST   | `/forgot-password`       | Request password reset          |
+| PATCH  | `/reset-password/:token` | Reset password                  |
+| GET    | `/verify-email/:token`   | Verify email                    |
+| POST   | `/resend-verification`   | Resend verification (protected) |
+
+### Events (`/api/v1/event`)
+
+| Method | Endpoint        | Description              |
+| ------ | --------------- | ------------------------ |
+| POST   | `/create-event` | Create event (organizer) |
+| GET    | `/`             | List organizer's events  |
+| GET    | `/:eventId`     | Get event details        |
+| PATCH  | `/:eventId`     | Update event             |
+| DELETE | `/:eventId`     | Delete event             |
+
+### Images (`/api/v1/image`)
+
+| Method | Endpoint           | Description                      |
+| ------ | ------------------ | -------------------------------- |
+| POST   | `/:eventId/images` | Upload event image (organizer)   |
+| GET    | `/:eventId/images` | List event images (paginated)    |
+| POST   | `/:eventId/match`  | Match selfie against event faces |
+| DELETE | `/:imageId`        | Delete image (organizer)         |
+
+### Users (`/api/v1/user`)
+
+| Method | Endpoint          | Description                |
+| ------ | ----------------- | -------------------------- |
+| GET    | `/:id`            | Get user by ID             |
+| PATCH  | `/update-profile` | Update profile (protected) |
+| PATCH  | `/update-avatar`  | Upload avatar (protected)  |
+| DELETE | `/delete-account` | Delete account (protected) |
+
+---
+
+## Project Structure
+
+```
+GrabPick/
+├── backend/
+│   ├── models/                          # face-api.js model weights
+│   │   ├── ssd_mobilenetv1/             # Face detector (primary)
+│   │   ├── face_landmark_68/            # 68-point face landmarks
+│   │   ├── face_recognition/            # 128-dim face descriptor
+│   │   └── tiny_face_detector/          # Lightweight detector (backup)
+│   ├── src/
+│   │   ├── app.js                       # Express app setup
+│   │   ├── server.js                    # Entry point (DB connect + listen)
+│   │   ├── config/
+│   │   │   ├── db.config.js             # MongoDB connection
+│   │   │   ├── env.js                   # Environment variables
+│   │   │   └── redis.config.js          # Redis/IORedis connection
+│   │   ├── controllers/                 # Request handlers
+│   │   │   ├── auth.controller.js
+│   │   │   ├── event.controller.js
+│   │   │   ├── image.controller.js
+│   │   │   ├── match.controller.js
+│   │   │   └── user.controller.js
+│   │   ├── services/                    # Business logic
+│   │   │   ├── auth.service.js
+│   │   │   ├── email.service.js
+│   │   │   ├── embedding.service.js     # Model loading + face embedding
+│   │   │   ├── event.service.js
+│   │   │   ├── image.service.js         # Upload processing + face matching
+│   │   │   ├── match.service.js
+│   │   │   └── user.service.js
+│   │   ├── models/                      # Mongoose schemas
+│   │   │   ├── user.model.js
+│   │   │   ├── event.model.js
+│   │   │   └── image.model.js
+│   │   ├── routes/                      # Express routers
+│   │   ├── middlewares/
+│   │   │   ├── auth.middleware.js        # JWT verification
+│   │   │   ├── emailVerify.middleware.js
+│   │   │   ├── error.handler.js         # Global error handler
+│   │   │   ├── role.middleware.js        # Organizer authorization
+│   │   │   └── upload.middleware.js      # Multer (profile + event images)
+│   │   ├── errors/
+│   │   │   └── app.error.js             # Custom AppError class
+│   │   ├── integrations/
+│   │   │   ├── cloud.storage.js         # S3 integration (placeholder)
+│   │   │   └── ml.client.js             # External ML client (placeholder)
+│   │   ├── queues/
+│   │   │   └── image.queue.js           # BullMQ queue (placeholder)
+│   │   ├── workers/
+│   │   │   └── image.worker.js          # BullMQ worker (placeholder)
+│   │   ├── utils/
+│   │   │   ├── jwt.utils.js
+│   │   │   ├── refreshToken.utils.js
+│   │   │   ├── email.util.js
+│   │   │   └── vector.utils.js          # Euclidean distance, cosine similarity
+│   │   └── uploads/
+│   │       ├── profile-images/          # User avatars
+│   │       └── event-images/            # Event photos
+│   ├── .env.example
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   ├── store.js                     # Redux store
+│   │   ├── index.css                    # Tailwind imports
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── ConfirmModal.jsx
+│   │   │   └── ProtectedRoute.jsx
+│   │   ├── pages/
+│   │   │   ├── LandingPage.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── CreateEventPage.jsx
+│   │   │   ├── EventsListPage.jsx
+│   │   │   ├── EventDetailPage.jsx      # Image upload + gallery
+│   │   │   ├── FindPhotosPage.jsx       # Enter event ID
+│   │   │   ├── MatchFacePage.jsx        # Selfie upload + results
+│   │   │   ├── ProfilePage.jsx
+│   │   │   ├── ForgotPasswordPage.jsx
+│   │   │   ├── ResetPasswordPage.jsx
+│   │   │   ├── VerifyEmailPage.jsx
+│   │   │   └── NotFoundPage.jsx
+│   │   ├── features/
+│   │   │   └── authSlice.js             # Redux auth state
+│   │   ├── hooks/
+│   │   │   └── useAuth.js
+│   │   ├── services/
+│   │   │   ├── api.js                   # Axios instance + interceptors
+│   │   │   ├── authService.js
+│   │   │   ├── eventService.js
+│   │   │   ├── imageService.js
+│   │   │   └── userService.js
+│   │   ├── routes/
+│   │   │   └── AppRoutes.jsx
+│   │   └── utils/
+│   │       └── image.js                 # Image URL resolver
+│   ├── vite.config.js                   # Dev proxy to backend
+│   ├── tailwind.config.js
+│   └── package.json
+│
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** >= 18
+- **MongoDB** (local or Atlas)
+- **Redis** (local or managed — required for BullMQ)
+
+### 1. Clone
+
+```bash
+git clone https://github.com/your-username/GrabPick.git
+cd GrabPick
+```
+
+### 2. Backend Setup
+
+```bash
 cd backend
 npm install
-# development
-npm run dev
-# production
-npm start
 ```
 
-Notes:
+Copy `.env.example` to `.env` and fill in:
 
-- Copy `.env.example` to `.env` and update environment variables accordingly.
-- Backend scripts are defined in [backend/package.json](backend/package.json).
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/grabpick
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+ACCESS_TOKEN_SECRET=your-access-secret
+ACCESS_TOKEN_EXPIRES=15m
+REFRESH_TOKEN_SECRET=your-refresh-secret
+REFRESH_TOKEN_EXPIRES=7d
+BASE_URL=http://localhost:5000
+EMAIL=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+NODE_ENV=development
+```
 
-3. Frontend setup (if present)
+Start the server:
 
-```powershell
+```bash
+npm run dev     # development (nodemon)
+npm start       # production
+```
+
+### 3. Frontend Setup
+
+```bash
 cd frontend
 npm install
-npm start
 ```
 
-## ⚙️ Configuration
+Create `.env`:
 
-- Environment variables are managed in `backend/.env` (see `backend/.env.example`).
-- Key settings: database URI, JWT secret, email SMTP credentials, Redis URL, and cloud storage credentials.
+```env
+VITE_API_URL=/api/v1
+VITE_BACKEND_URL=http://localhost:5000
+```
 
-## 🔐 Authentication & Security
+Start the dev server:
 
-- Signup & Login with JWT
-- HttpOnly cookies recommended for storing refresh tokens
-- Password hashing with `bcrypt`
-- Email-based password reset using encrypted tokens
+```bash
+npm run dev     # Vite dev server on :5173
+npm run build   # Production build
+```
 
-## 🖼 Uploads & Profiles
-
-- Avatar upload handled via `multer` middleware
-- Old avatar cleanup on update
-- Uploads stored in `backend/uploads` (profile-images), easily switchable to S3 or other providers
-
-See `src/middlewares/upload.middleware.js` and `src/controllers/user.controller.js` for implementation details.
-
-## 🧠 AI & ML Integration
-
-- Face/feature models are present under `backend/models` (`tiny_face_detector`, `face_landmark_68`, `face_recognition`).
-- AI client integration is in `src/integrations/ml.client.js` and services referencing embeddings in `src/services/embedding.service.js`.
-
-## 📂 Project Structure (Backend)
-
-- `src/controllers` — request handlers
-- `src/services` — business logic
-- `src/models` — Mongoose models
-- `src/routes` — express routes
-- `src/middlewares` — auth, upload, error handling
-- `src/integrations` — cloud / ML clients
-- `uploads/` — persistent file storage (local)
-
-## 🧪 Tests
-
-- A small test/example exists at `src/tests/testEmbedding.js` — extend with your preferred test runner.
-
-## ▶️ Common Commands
-
-- Install backend deps: `cd backend && npm install`
-- Start backend in dev: `npm run dev`
-- Start backend in prod: `npm start`
-
-## 🚀 Production & Scalability Notes
-
-- Replace local file storage with S3/Cloudinary for horizontal scale
-- Use managed Redis for BullMQ jobs and caching
-- Containerize with Docker and orchestrate with Kubernetes for microservice scale
-- External AI APIs can replace local models for faster/cheaper generation
-
-## 👨‍💻 Contributing
-
-Contributions are welcome. Suggested workflow:
-
-1. Fork the repo
-2. Create a feature branch
-3. Add tests and documentation
-4. Open a pull request
-
-## 📄 License
-
-Add your preferred license to the repository root (e.g., `LICENSE`).
-
-## ✍️ Author
-
-**Akhilesh Chouhan**
-B.Tech Computer Science
-Full-Stack & AI Enthusiast
-
-Focused on building scalable, production-grade applications with intelligent system design.
-
-## 🚀 GrabPic — Event Photo Discovery (Use Case)
-
-Find your event photos instantly using face recognition.
-
-GrabPic is a full-stack, production-ready web platform that allows event attendees to instantly find their photos from thousands of event images using AI-powered face recognition.
-
-## 📌 Problem Statement
-
-At large events like:
-
-- 🎉 Weddings
-- 🎵 Concerts
-- 🎓 College fests
-- 🏢 Conferences
-
-Organizers upload thousands of photos. Attendees struggle to manually scroll and find their own pictures.
-
-Manual searching is:
-
-- ❌ Time-consuming
-- ❌ Frustrating
-- ❌ Inefficient
-
-## 💡 Solution
-
-Grappic solves this problem using face recognition technology.
-
-How it works:
-
-1. Organizer uploads event photos.
-2. Faces are detected and converted into numerical embeddings.
-3. Attendee joins the event.
-4. Attendee takes a selfie.
-5. The system matches the selfie embedding with stored embeddings.
-6. Matched photos are instantly displayed.
-
-No manual searching required.
-
-## 🧠 Key Features
-
-### 👨‍💼 Organizer
-
-- Secure authentication (JWT-based)
-- Create and manage events
-- Bulk photo upload
-- Background face processing
-- Event-level data isolation
-- Upload progress tracking
-
-### 🙋 Attendee
-
-- Join event via Event Code / QR
-- Capture selfie using browser camera
-- AI-powered face matching
-- View matched photos
-- Download selected photos
-
-## 🏗️ System Architecture
-
-High-Level Architecture
-
-Frontend (React)
-|
-Backend API (Node.js + Express)
-|
+The Vite dev server proxies `/api` and `/uploads` to the backend automatically.
 
 ---
 
-| Auth Service |
-| Event Service |
-| Upload Service |
-| Face Processing Service |
-| Vector Matching Engine |
+## Face Recognition Details
+
+### Models Used
+
+| Model              | Purpose                    | Output                                     |
+| ------------------ | -------------------------- | ------------------------------------------ |
+| SSD MobileNet v1   | Face detection             | Bounding boxes + confidence scores         |
+| FaceLandmark68Net  | Facial landmark detection  | 68 key points (eyes, nose, mouth, jawline) |
+| FaceRecognitionNet | Face descriptor extraction | 128-dimensional float vector               |
+
+### Matching Algorithm
+
+- **Metric:** Euclidean distance between 128-dim descriptors
+- **Threshold:** 0.6 (same person if distance < 0.6)
+- **Per-image logic:** Best (closest) face match is used; only images with at least one face below threshold are returned
+- **Ranking:** Results sorted by similarity score (1 − distance)
+
+### Why Euclidean Distance?
+
+face-api.js descriptors are trained with a contrastive loss that optimizes for L2 (Euclidean) distance. The 0.6 threshold is calibrated specifically for this metric. Cosine similarity operates on a different scale and produces weaker separation between true matches and impostors.
 
 ---
 
-    			|
+## Deployment
+
+| Component | Recommended                             |
+| --------- | --------------------------------------- |
+| Frontend  | Vercel, Netlify                         |
+| Backend   | Railway, Render, AWS EC2                |
+| Database  | MongoDB Atlas                           |
+| Redis     | Redis Cloud, AWS ElastiCache            |
+| Storage   | AWS S3, Cloudinary (replace local disk) |
+
+### Production Checklist
+
+- [ ] Set `NODE_ENV=production`
+- [ ] Use managed MongoDB (Atlas) and Redis
+- [ ] Replace local file storage with S3/Cloudinary
+- [ ] Set secure CORS origins (replace `cors()` wildcard)
+- [ ] Enable HTTPS
+- [ ] Set strong JWT secrets
 
 ---
 
-| MongoDB (Metadata + Embeddings) |
-| Cloud Storage (Images - S3) |
+## Future Enhancements
+
+- [ ] BullMQ background processing for large batch uploads
+- [ ] Cloud storage integration (S3/Cloudinary)
+- [ ] QR code for instant event joining
+- [ ] Photo download (individual + bulk zip)
+- [ ] Organizer analytics dashboard
+- [ ] Mobile app (React Native)
+- [ ] Dedicated vector database for large-scale matching
+- [ ] GPU-accelerated face processing
 
 ---
 
-## 🔁 System Data Flow
+## Contributing
 
-### 📷 Organizer Upload Flow
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'Add my feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
 
-1. Organizer logs in
-2. Creates event
-3. Uploads bulk photos
-4. Images stored in cloud storage
-5. Each image processed: face detection, face cropping, embedding generation
-6. Embeddings stored with photo reference
+---
 
-### 🤳 Attendee Matching Flow
+## License
 
-1. Attendee joins event
-2. Takes selfie
-3. Face detected
-4. Embedding generated
-5. Similarity search performed within event scope
-6. Matching photo IDs retrieved
-7. Signed image URLs returned
-8. Results displayed
+This project is licensed under the [MIT License](LICENSE).
 
-## 🗄️ Database Design
+---
 
-User
-{
-\_id,
-name,
-email,
-passwordHash,
-role: "ORGANIZER"
-}
-Event
-{
-\_id,
-name,
-description,
-date,
-organizerId,
-eventCode,
-createdAt
-}
-Photo
-{
-\_id,
-eventId,
-imageUrl,
-uploadedAt
-}
-FaceEmbedding
-{
-\_id,
-eventId,
-photoId,
-vector: [Number],
-faceBox,
-createdAt
-}
+## Author
 
-## 🤖 Face Recognition Logic
+**Ramakant Chouhan**
+B.Tech Computer Science | Full-Stack & AI Developer
 
-1. Face Detection — Detects face location inside image.
-
-2. Face Embedding — Converts face into numerical vector (e.g., 128–512 numbers). Embeddings are faster to compare, privacy-safe, and lightweight to store.
-
-3. Similarity Search — Compare selfie vector with stored vectors, apply threshold, and retrieve closest matches.
-
-## 🔐 Security & Privacy
-
-- Event-scoped face matching
-- JWT-based authentication
-- No identity storage for attendees
-- Signed URLs for secure image access
-- Optional event deletion
-- Embeddings instead of raw face data (privacy-first)
-
-## ⚙️ Tech Stack
-
-Frontend
-
-- React.js
-- Axios
-- Tailwind / CSS
-
-Backend
-
-- Node.js
-- Express.js
-- JWT Authentication
-- Multer (file uploads)
-
-Database
-
-- MongoDB
-
-AI Processing
-
-- Face Detection Model
-- Face Embedding Model
-- Cosine Similarity Matching
-
-Storage
-
-- AWS S3 / Cloudinary
-
-## 📦 API Structure
-
-Auth
-POST /auth/signup
-POST /auth/login
-
-Event
-POST /events
-GET /events/:id
-
-Upload
-POST /events/:id/photos
-POST /events/:id/process
-
-Matching
-POST /events/:id/selfie
-GET /events/:id/results
-
-## 🚀 Deployment
-
-Frontend: Vercel
-
-Backend: AWS EC2 / Render / Railway
-
-Storage: AWS S3
-
-Use environment variables for secrets and design for scalable GPU integration in future.
-
-## 📊 Scalability Strategy
-
-Phase 1 (MVP)
-
-- Single backend instance
-- MongoDB vector storage
-- CPU-based face processing
-
-Phase 2
-
-- Background job queue
-- Redis caching
-- CDN for images
-
-Phase 3
-
-- Dedicated vector database
-- GPU acceleration
-- Microservice architecture
-
-## 🧪 Testing Strategy
-
-- Small dataset testing
-- Multiple face validation
-- Edge cases: No face detected, Multiple faces in selfie, Blurry images
-- Performance testing with 1000+ images
-
-## 📈 Future Enhancements
-
-- Mobile app
-- QR-based instant join
-- Group tagging
-- Paid organizer plans
-- Organizer analytics dashboard
-- Email notifications
-
-End of event-photo content.
+Built with Node.js, React, and face-api.js.

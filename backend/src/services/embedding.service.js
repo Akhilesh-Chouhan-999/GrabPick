@@ -15,8 +15,8 @@ export const loadModels = async () => {
   // IMPORTANT: always load models from backend root
   const modelPath = path.resolve('models');
 
-  await faceapi.nets.tinyFaceDetector.loadFromDisk(
-    path.join(modelPath, 'tiny_face_detector')
+  await faceapi.nets.ssdMobilenetv1.loadFromDisk(
+    path.join(modelPath, 'ssd_mobilenetv1')
   );
 
   await faceapi.nets.faceLandmark68Net.loadFromDisk(
@@ -36,7 +36,7 @@ export const generateFaceEmbedding = async (imagePath) => {
   const img = await canvas.loadImage(imagePath);
 
   const detection = await faceapi
-    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+    .detectSingleFace(img, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
     .withFaceLandmarks()
     .withFaceDescriptor();
 
